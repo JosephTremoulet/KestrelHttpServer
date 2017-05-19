@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using BenchmarkDotNet.Attributes;
+// using BenchmarkDotNet.Attributes;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Performance.Mocks;
 
 namespace Microsoft.AspNetCore.Server.Kestrel.Performance
 {
-    [Config(typeof(CoreConfig))]
+    [BenchmarkDotNet.Attributes.Config(typeof(CoreConfig))]
     public class RequestParsingBenchmark
     {
         public IPipe Pipe { get; set; }
@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
 
         public PipeFactory PipelineFactory { get; set; }
 
-        [Setup]
+        [BenchmarkDotNet.Attributes.Setup]
         public void Setup()
         {
             var serviceContext = new ServiceContext
@@ -39,7 +39,14 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             Pipe = PipelineFactory.Create();
         }
 
-        [Benchmark(Baseline = true, OperationsPerInvoke = RequestParsingData.InnerLoopCount)]
+        [Microsoft.Xunit.Performance.Benchmark(InnerIterationCount = RequestParsingData.InnerLoopCount)]
+        public void PlaintextTechEmpower_()
+        {
+            var obj = this; // new RequestParsingBenchmark();
+            obj.Setup();
+            Microsoft.Xunit.Performance.Benchmark.Iterate(() => obj.PlaintextTechEmpower());
+        }
+        [BenchmarkDotNet.Attributes.Benchmark(Baseline = true, OperationsPerInvoke = RequestParsingData.InnerLoopCount)]
         public void PlaintextTechEmpower()
         {
             for (var i = 0; i < RequestParsingData.InnerLoopCount; i++)
@@ -49,7 +56,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             }
         }
 
-        [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount)]
+        // [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount)]
         public void PlaintextAbsoluteUri()
         {
             for (var i = 0; i < RequestParsingData.InnerLoopCount; i++)
@@ -59,7 +66,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             }
         }
 
-        [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount * RequestParsingData.Pipelining)]
+        // [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount * RequestParsingData.Pipelining)]
         public void PipelinedPlaintextTechEmpower()
         {
             for (var i = 0; i < RequestParsingData.InnerLoopCount; i++)
@@ -69,7 +76,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             }
         }
 
-        [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount * RequestParsingData.Pipelining)]
+        // [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount * RequestParsingData.Pipelining)]
         public void PipelinedPlaintextTechEmpowerDrainBuffer()
         {
             for (var i = 0; i < RequestParsingData.InnerLoopCount; i++)
@@ -79,7 +86,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             }
         }
 
-        [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount)]
+        // [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount)]
         public void LiveAspNet()
         {
             for (var i = 0; i < RequestParsingData.InnerLoopCount; i++)
@@ -89,7 +96,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             }
         }
 
-        [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount * RequestParsingData.Pipelining)]
+        // [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount * RequestParsingData.Pipelining)]
         public void PipelinedLiveAspNet()
         {
             for (var i = 0; i < RequestParsingData.InnerLoopCount; i++)
@@ -99,7 +106,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             }
         }
 
-        [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount)]
+        // [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount)]
         public void Unicode()
         {
             for (var i = 0; i < RequestParsingData.InnerLoopCount; i++)
@@ -109,7 +116,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             }
         }
 
-        [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount * RequestParsingData.Pipelining)]
+        // [Benchmark(OperationsPerInvoke = RequestParsingData.InnerLoopCount * RequestParsingData.Pipelining)]
         public void UnicodePipelined()
         {
             for (var i = 0; i < RequestParsingData.InnerLoopCount; i++)

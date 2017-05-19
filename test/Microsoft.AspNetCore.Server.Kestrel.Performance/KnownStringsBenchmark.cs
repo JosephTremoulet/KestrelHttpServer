@@ -3,7 +3,7 @@
 
 using System;
 using System.Text;
-using BenchmarkDotNet.Attributes;
+// using BenchmarkDotNet.Attributes;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure;
 using Microsoft.AspNetCore.Server.Kestrel.Internal.System;
@@ -25,7 +25,13 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
         static byte[] _version = Encoding.UTF8.GetBytes("HTTP/1.1\r\n");
         const int loops = 1000;
 
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        [Microsoft.Xunit.Performance.Benchmark(InnerIterationCount = loops * 10)]
+        public static void GetKnownMethod_GET_()
+        {
+            var obj = new KnownStringsBenchmark();
+            Microsoft.Xunit.Performance.Benchmark.Iterate(() => obj.GetKnownMethod_GET());
+        }
+        [BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_GET()
         {
             Span<byte> data = _methodGet;
@@ -33,7 +39,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             return GetKnownMethod(data);
         }
 
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_CONNECT()
         {
             Span<byte> data = _methodConnect;
@@ -41,14 +47,14 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             return GetKnownMethod(data);
         }
 
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_DELETE()
         {
             Span<byte> data = _methodDelete;
 
             return GetKnownMethod(data);
         }
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_HEAD()
         {
             Span<byte> data = _methodHead;
@@ -56,21 +62,21 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             return GetKnownMethod(data);
         }
 
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_PATCH()
         {
             Span<byte> data = _methodPatch;
 
             return GetKnownMethod(data);
         }
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_POST()
         {
             Span<byte> data = _methodPost;
 
             return GetKnownMethod(data);
         }
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_PUT()
         {
             Span<byte> data = _methodPut;
@@ -78,7 +84,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             return GetKnownMethod(data);
         }
 
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_OPTIONS()
         {
             Span<byte> data = _methodOptions;
@@ -86,7 +92,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             return GetKnownMethod(data);
         }
 
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownMethod_TRACE()
         {
             Span<byte> data = _methodTrace;
@@ -125,7 +131,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             return len;
         }
 
-        [Benchmark(OperationsPerInvoke = loops * 10)]
+        //[BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = loops * 10)]
         public int GetKnownVersion_HTTP1_1()
         {
             int len = 0;

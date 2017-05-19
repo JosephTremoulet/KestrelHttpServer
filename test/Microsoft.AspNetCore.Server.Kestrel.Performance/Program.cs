@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Reflection;
-using BenchmarkDotNet.Running;
 
 namespace Microsoft.AspNetCore.Server.Kestrel.Performance
 {
@@ -10,7 +9,19 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
     {
         public static void Main(string[] args)
         {
-            BenchmarkSwitcher.FromAssembly(typeof(Program).GetTypeInfo().Assembly).Run(args);
+            var assembly = typeof(Program).GetTypeInfo().Assembly;
+
+            if (args.Length == 0 || args[0] != "xunit")
+            {
+                BenchmarkDotNet.Running.BenchmarkSwitcher.FromAssembly(assembly).Run(args);
+            }
+            else
+            {
+                using (var p = new Microsoft.Xunit.Performance.Api.XunitPerformanceHarness(args))
+                {
+                    p.RunBenchmarks(assembly.Location);
+                }
+            }
         }
     }
 }
