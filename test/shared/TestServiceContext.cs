@@ -12,13 +12,23 @@ namespace Microsoft.AspNetCore.Testing
     public class TestServiceContext : ServiceContext
     {
         public TestServiceContext()
+            : this(new KestrelTestLoggerFactory())
         {
-            ErrorLogger = new TestApplicationErrorLogger();
-            Log = new TestKestrelTrace(ErrorLogger);
+        }
+
+        public TestServiceContext(ILoggerFactory loggerFactory)
+            : this(loggerFactory, new KestrelTrace(loggerFactory.CreateLogger("Microsoft.AspNetCore.Server.Kestrel")))
+        {
+        }
+
+        public TestServiceContext(ILoggerFactory loggerFactory, IKestrelTrace kestrelTrace)
+        {
+            LoggerFactory = loggerFactory;
+            Log = kestrelTrace;
             ThreadPool = new LoggingThreadPool(Log);
             SystemClock = new MockSystemClock();
             DateHeaderValueManager = new DateHeaderValueManager(SystemClock);
-            ConnectionManager = new FrameConnectionManager(Log);
+            ConnectionManager = new FrameConnectionManager(Log, ResourceCounter.Unlimited, ResourceCounter.Unlimited);
             DateHeaderValue = DateHeaderValueManager.GetDateHeaderValues().String;
             HttpParserFactory = frameAdapter => new HttpParser<FrameAdapter>(frameAdapter.Frame.ServiceContext.Log.IsEnabled(LogLevel.Information));
             ServerOptions = new KestrelServerOptions
@@ -27,7 +37,7 @@ namespace Microsoft.AspNetCore.Testing
             };
         }
 
-        public TestApplicationErrorLogger ErrorLogger { get; }
+        public ILoggerFactory LoggerFactory { get; }
 
         public string DateHeaderValue { get; }
     }

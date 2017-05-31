@@ -160,7 +160,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http
 
         bool IHttpResponseFeature.HasStarted => HasResponseStarted;
 
-        bool IHttpUpgradeFeature.IsUpgradableRequest => _upgrade;
+        bool IHttpUpgradeFeature.IsUpgradableRequest => _upgradeAvailable;
 
         bool IFeatureCollection.IsReadOnly => false;
 
@@ -230,6 +230,25 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http
 
         async Task<Stream> IHttpUpgradeFeature.UpgradeAsync()
         {
+            if (!((IHttpUpgradeFeature)this).IsUpgradableRequest)
+            {
+                throw new InvalidOperationException(CoreStrings.CannotUpgradeNonUpgradableRequest);
+            }
+
+            if (_wasUpgraded)
+            {
+                throw new InvalidOperationException(CoreStrings.UpgradeCannotBeCalledMultipleTimes);
+            }
+
+            if (!ServiceContext.ConnectionManager.UpgradedConnectionCount.TryLockOne())
+            {
+                throw new InvalidOperationException(CoreStrings.UpgradedConnectionLimitReached);
+            }
+
+            _wasUpgraded = true;
+
+            ServiceContext.ConnectionManager.NormalConnectionCount.ReleaseOne();
+
             StatusCode = StatusCodes.Status101SwitchingProtocols;
             ReasonPhrase = "Switching Protocols";
             ResponseHeaders["Connection"] = "Upgrade";
