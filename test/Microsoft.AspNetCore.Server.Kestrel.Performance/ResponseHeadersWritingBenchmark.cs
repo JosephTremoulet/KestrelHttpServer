@@ -2,28 +2,30 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BenchmarkDotNet.Attributes;
+// using BenchmarkDotNet.Attributes;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Internal.System.IO.Pipelines;
 using Microsoft.AspNetCore.Server.Kestrel.Performance.Mocks;
 using Microsoft.AspNetCore.Testing;
+using Xunit;
 
 namespace Microsoft.AspNetCore.Server.Kestrel.Performance
 {
-    [Config(typeof(CoreConfig))]
+    [BenchmarkDotNet.Attributes.Config(typeof(CoreConfig))]
     public class ResponseHeadersWritingBenchmark
     {
         private static readonly byte[] _helloWorldPayload = Encoding.ASCII.GetBytes("Hello, World!");
 
         private TestFrame<object> _frame;
 
-        [Params(
+        [BenchmarkDotNet.Attributes.Params(
             BenchmarkTypes.TechEmpowerPlaintext,
             BenchmarkTypes.PlaintextChunked,
             BenchmarkTypes.PlaintextWithCookie,
@@ -32,7 +34,32 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
         )]
         public BenchmarkTypes Type { get; set; }
 
-        [Benchmark]
+        /*
+         One option for [Params] is to include this and then put [MemberData(nameof(GetTypes))] on
+         the benchmark method.  The other, below, is to name the enum values in [InlineData] attributes
+        public static IEnumerable<object[]> GetTypes()
+        {
+            foreach(BenchmarkTypes type in Enum.GetValues(typeof(BenchmarkTypes)))
+            {
+                yield return new object[] { type };
+            }
+        }
+        */
+
+        [Microsoft.Xunit.Performance.Benchmark(InnerIterationCount = RequestParsingData.InnerLoopCount)]
+        [InlineData(BenchmarkTypes.TechEmpowerPlaintext)]
+        [InlineData(BenchmarkTypes.PlaintextChunked)]
+        [InlineData(BenchmarkTypes.PlaintextWithCookie)]
+        [InlineData(BenchmarkTypes.PlaintextChunkedWithCookie)]
+        [InlineData(BenchmarkTypes.LiveAspNet)]
+        public void Output_(BenchmarkTypes type)
+        {
+            var obj = this; // new RequestParsingBenchmark();
+            obj.Setup();
+            obj.Type = type;
+            Microsoft.Xunit.Performance.Benchmark.Iterate(() => obj.Output().Wait());
+        }
+        [BenchmarkDotNet.Attributes.Benchmark]
         public async Task Output()
         {
             _frame.Reset();
@@ -107,7 +134,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             return _frame.WriteAsync(new ArraySegment<byte>(_helloWorldPayload), default(CancellationToken));
         }
 
-        [Setup]
+        [BenchmarkDotNet.Attributes.Setup]
         public void Setup()
         {
             var pipeFactory = new PipeFactory();
