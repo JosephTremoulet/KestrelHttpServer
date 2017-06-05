@@ -46,7 +46,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
         }
         */
 
-        [Microsoft.Xunit.Performance.Benchmark(InnerIterationCount = RequestParsingData.InnerLoopCount)]
+        [Microsoft.Xunit.Performance.Benchmark]
         [InlineData(BenchmarkTypes.TechEmpowerPlaintext)]
         [InlineData(BenchmarkTypes.PlaintextChunked)]
         [InlineData(BenchmarkTypes.PlaintextWithCookie)]
@@ -54,9 +54,9 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
         [InlineData(BenchmarkTypes.LiveAspNet)]
         public void Output_(BenchmarkTypes type)
         {
-            var obj = this; // new RequestParsingBenchmark();
-            obj.Setup();
+            var obj = this; // new ResponseHeadersWritingBenchmark();
             obj.Type = type;
+            obj.Setup();
             Microsoft.Xunit.Performance.Benchmark.Iterate(() => obj.Output().Wait());
         }
         [BenchmarkDotNet.Attributes.Benchmark]
