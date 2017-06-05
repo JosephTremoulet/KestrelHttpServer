@@ -3,17 +3,18 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
-using BenchmarkDotNet.Attributes;
+// using BenchmarkDotNet.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Internal.System.IO.Pipelines;
+using Xunit;
 
 namespace Microsoft.AspNetCore.Server.Kestrel.Performance
 {
-    [Config(typeof(CoreConfig))]
+    [BenchmarkDotNet.Attributes.Config(typeof(CoreConfig))]
     public class ResponseHeaderCollectionBenchmark
     {
         private const int InnerLoopCount = 512;
@@ -32,7 +33,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             Unknown
         }
 
-        [Params(
+        [BenchmarkDotNet.Attributes.Params(
             BenchmarkTypes.ContentLengthNumeric,
             BenchmarkTypes.ContentLengthString,
             BenchmarkTypes.Plaintext,
@@ -41,7 +42,20 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
         )]
         public BenchmarkTypes Type { get; set; }
 
-        [Benchmark(OperationsPerInvoke = InnerLoopCount)]
+        [Microsoft.Xunit.Performance.Benchmark(InnerIterationCount = InnerLoopCount)]
+        [InlineData(BenchmarkTypes.ContentLengthNumeric)]
+        [InlineData(BenchmarkTypes.ContentLengthString)]
+        [InlineData(BenchmarkTypes.Plaintext)]
+        [InlineData(BenchmarkTypes.Common)]
+        [InlineData(BenchmarkTypes.Unknown)]
+        public void SetHeaders_(BenchmarkTypes type)
+        {
+            var obj = this; // new ResponseHeaderCollectionBenchmark();
+            obj.Type = type;
+            obj.Setup();
+            Microsoft.Xunit.Performance.Benchmark.Iterate(() => obj.SetHeaders());
+        }
+        [BenchmarkDotNet.Attributes.Benchmark(OperationsPerInvoke = InnerLoopCount)]
         public void SetHeaders()
         {
             switch (Type)
@@ -166,7 +180,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
             }
         }
 
-        [Setup]
+        [BenchmarkDotNet.Attributes.Setup]
         public void Setup()
         {
             var serviceContext = new ServiceContext
