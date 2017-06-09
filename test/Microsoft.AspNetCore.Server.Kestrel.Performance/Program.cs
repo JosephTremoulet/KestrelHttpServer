@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
         {
             var assembly = typeof(Program).GetTypeInfo().Assembly;
 
-            if (args.Length == 0 || args[0] != "xunit")
+            if (args.Length == 1 && string.Compare(args[0], "BenchmarkDotNet", true) == 0)
             {
                 BenchmarkDotNet.Running.BenchmarkSwitcher.FromAssembly(assembly).Run(args);
             }
